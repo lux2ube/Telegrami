@@ -27,7 +27,7 @@ const mainMenu = new Keyboard()
 
 // 2. قائمة الإجراءات
 const actionMenu = new InlineKeyboard()
-    .url("🌐 تصفح الوسطاء", "https://www.bksheesh.com/brokers")
+    .url("🌐 تصفح جميع الوسطاء", "https://www.bksheesh.com/brokers")
     .url("👤 فتح حساب كاش باك", "https://www.bksheesh.com/register");
 
 // --- معالجة الأوامر والرسائل ---
@@ -59,7 +59,7 @@ bot.hears(["💰 أسعار الكاش باك", "/rates"], async (ctx) => {
     await ctx.reply(msg, { parse_mode: "Markdown" });
 });
 
-// 3. قائمة الوسطاء (تم التحديث حسب طلبك)
+// 3. قائمة الوسطاء (محدثة حسب الطلب)
 bot.hears(["🏦 قائمة الوسطاء", "/brokers"], async (ctx) => {
     await ctx.reply(
         "🏦 **شركاء النجاح (الوسطاء المدعومين)**\n\n" +
@@ -150,74 +150,4 @@ bot.callbackQuery(/^calc_res_(.+)_(.+)$/, async (ctx) => {
 // الرد الافتراضي
 bot.on("message", (ctx) => ctx.reply("يرجى استخدام القائمة بالأسفل للتنقل.", { reply_markup: mainMenu }));
 
-export const POST = webhookCallback(bot, "std/http");
-    
-    await ctx.reply("🧮 **حاسبة التوفير الذكية**\nاختر الرمز الذي تتداوله لتقدير قيمة الاسترداد:", {
-        reply_markup: keyboard
-    });
-});
-
-// --- خطوات الحاسبة التفاعلية ---
-bot.callbackQuery(/^calc_pair_(.+)$/, async (ctx) => {
-    const pair = ctx.match[1]; 
-    const keyboard = new InlineKeyboard()
-        .text("1 لوت / يومياً", `calc_res_${pair}_1`)
-        .text("5 لوت / يومياً", `calc_res_${pair}_5`)
-        .text("10 لوت / يومياً", `calc_res_${pair}_10`);
-
-    await ctx.editMessageText(`📉 تم اختيار: **${pair}**\nكم حجم تداولك اليومي المتوقع؟`, {
-        parse_mode: "Markdown", 
-        reply_markup: keyboard
-    });
-});
-
-bot.callbackQuery(/^calc_res_(.+)_(.+)$/, async (ctx) => {
-    const pair = ctx.match[1];
-    const lots = parseInt(ctx.match[2]);
-    
-    // استخراج السعر بناءً على الاسم (مطابقة جزئية بسيطة)
-    const rate = RATES[pair] || 4.0; // قيمة افتراضية في حال عدم المطابقة
-    
-    const daily = lots * rate;
-    const monthly = daily * 22;
-
-    await ctx.editMessageText(
-        `📊 **تقرير التقديرات المالية**\n\n` +
-        `الرمز: ${pair}\nالحجم: ${lots} لوت/يومياً\n\n` +
-        `💰 **الاسترداد اليومي:** $${daily}\n` +
-        `🗓️ **الاسترداد الشهري:** $${monthly}\n\n` +
-        `_هذا المبلغ يتم دفعه حالياً للوسيط كعمولة. انضم إلينا لاستعادته في محفظتك._`,
-        { 
-            parse_mode: "Markdown",
-            reply_markup: actionMenu 
-        }
-    );
-});
-
-// الرد الافتراضي
-bot.on("message", (ctx) => ctx.reply("يرجى استخدام القائمة بالأسفل للتنقل.", { reply_markup: mainMenu }));
-
-export const POST = webhookCallback(bot, "std/http");
-        .url("🔗 ابدأ الاسترداد", "https://www.bksheesh.com/register")
-        .row()
-        .text("🔙 القائمة الرئيسية", "menu_main");
-
-    await ctx.editMessageText(msg, { parse_mode: "Markdown", reply_markup: keyboard });
-});
-
-// --- D. BACK TO MAIN MENU ---
-bot.callbackQuery("menu_main", async (ctx) => {
-    const keyboard = new InlineKeyboard()
-        .text("💸 كم سأسترجع؟ (الأسعار)", "menu_rates").row()
-        .text("🧮 حاسبة التوفير الذكية", "calc_start").row()
-        .url("🔗 ربط حسابي فوراً", "https://www.bksheesh.com/register");
-        
-    await ctx.editMessageText(
-        "**يا هلا.. خلنا نكون واضحين.** 🤝\n\n" +
-        "اختر خدمتك من الأسفل:",
-        { parse_mode: "Markdown", reply_markup: keyboard }
-    );
-});
-
-// --- E. VERCEL CONNECTION ---
 export const POST = webhookCallback(bot, "std/http");
